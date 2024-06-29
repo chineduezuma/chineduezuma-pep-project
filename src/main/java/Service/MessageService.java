@@ -1,37 +1,26 @@
 package Service;
 
-import Model.Account;
-import DAO.AccountDAO;
+
 import Model.Message;
 import DAO.MessageDAO;
 
 import java.util.List;
 
-public class SocialMediaService {
+public class MessageService {
 
-    AccountDAO accountDAO;
-    MessageDAO messageDAO;
+    private MessageDAO messageDAO;
 
     /**
      * No-args constructor for a socialmediaService instantiates a plain flightDAO.
      * There is no need to modify this constructor.
      */
-    public SocialMediaService(){
-        accountDAO = new AccountDAO();
-        messageDAO = new MessageDAO();
+    public MessageService(){
+        
+         messageDAO = new MessageDAO();
+
     }
 
-    /**
-     * Constructor for a SocialMediaService when a AccountDAO is provided.
-     * This is used for when a mock AccountDAO that exhibits mock behavior is used in the test cases.
-     * This would allow the testing of SocialMediaService independently of AccountDAO.
-     * There is no need to modify this constructor.
-     * @param accountDAO
-     */
-    public SocialMediaService(AccountDAO accountDAO){
-        this.accountDAO = accountDAO;
-    }
-    
+   
 
     /**
      * Constructor for a SocialMediaService when a MessageDAO is provided.
@@ -40,68 +29,10 @@ public class SocialMediaService {
      * There is no need to modify this constructor.
      * @param messageDAO
      */
-    public SocialMediaService(MessageDAO messageDAO){
+    public MessageService(MessageDAO messageDAO){
         this.messageDAO = messageDAO;
     }
 
-
-    /**
-     * Constructor for a SocialMediaService when  AccountDAO and MessageDAO are provided.
-     * This is used for when a mock AccountDAO and a mock MessageDAO that exhibits mock behavior is used in the test cases.
-     * This would allow the testing of SocialMediaService independently of AccountDAO and MessageDAO.
-     * There is no need to modify this constructor.
-     * @param accountDAO
-     * @param messageDAO
-     */
-    public SocialMediaService(AccountDAO accountDAO, MessageDAO messageDAO){
-        this.accountDAO = accountDAO;
-        this.messageDAO = messageDAO;
-    }
-
-
-    /**
-     * Use the AccountDAO to add a new user to the database.
-     *
-     * This method should also return the added account (new user). A distinction should be made between *transient* and
-     * *persisted* objects - the *transient* account Object given as the parameter will not contain the account's id,
-     * because it is not yet a database record. When this method is used, it should return the full persisted account,
-     * which will contain the account's id. This way, any part of the application that uses this method has
-     * all information about the new account, because knowing the new account's ID is necessary. This means that the
-     * method should return the Account returned by the AccountDAO's insertNewUserAccount method, and not the account provided by
-     * the parameter 'account'.
-     *
-     * @param account an object representing a new Account.
-     * @return the newly added flight if the add operation was successful, including the flight_id. We do this to
-     *         inform our provide the front-end client with information about the added Flight.
-     */
-    public Account addAccount(Account account){
-
-        if(account.getUsername() != null && account.getPassword().length() >= 4 && accountDAO.getAccount(account) == null){
-            return accountDAO.insertNewUserAccount(account);
-        }
-        return null;
-    }
-
-
-    /**
-     * Use the AccountDAO to verify an existing account from the database.
-     * check that the username and password already exists. To do this, use an if statement that checks
-     * if accountDAO.getAccount returns null for the account object, as this would indicate that the account object does not
-     * exist.
-     *
-     * @param account an object containing all data that should be used to query database.
-     *         the account object does not contain a account ID.
-     * @return information details of account if it is in the database. Return null if account not found in database
-     *         We do this to inform our application about successful/unsuccessful operations. 
-     */
-    public Account verifyAccountLogin(Account account){
-        
-        if(accountDAO.getAccount(account) != null){
-            
-            return accountDAO.getAccount(account);
-        }
-            return null;
-    }
 
 
     /**
@@ -119,13 +50,15 @@ public class SocialMediaService {
      * @return the newly added message if the add operation was successful, including the message_id. We do this to
      *         inform our provide the front-end client with information about the added Message.
      */
-    public Message addMessage(Message message, Account account){
+    public Message addMessage(Message message){
 
-        if(message.getMessage_text() != null && message.getMessage_text().length() <= 255 && accountDAO.getAccountByPostBy(message) != null){
+        if(message.getMessage_text() != "" && message.getMessage_text().length() <= 255 && messageDAO.getAccountByPostBy(message) != null){
+           
             return messageDAO.insertNewMessage(message);
         }
         return null;
     }
+
 
 
      /**
@@ -150,15 +83,12 @@ public class SocialMediaService {
      * @return the details of the message object by message ID 
      */
     public Message getMessageById(int message_id){
-        
-        if(messageDAO.getMessageById(message_id) != null){
-            
+         
             return messageDAO.getMessageById(message_id);
-        }
-            return null;
     }
 
 
+    
      /**
      * Use the MessageDAO to delete a message by message ID.
      * First check that the message ID already exists. To do this, use an if statement that checks
@@ -170,12 +100,15 @@ public class SocialMediaService {
      */
     public Message deleteMessageById(int message_id){
         
-        if(messageDAO.deleteMessageById(message_id) != null){
+        if(messageDAO.getMessageById(message_id) == null){
             
-            return messageDAO.deleteMessageById(message_id);
-        }
             return null;
+        }
+
+            messageDAO.deleteMessageById(message_id);
+            return messageDAO.getMessageById(message_id);
     }
+
 
 
     /**
@@ -193,7 +126,7 @@ public class SocialMediaService {
      */
     public Message updateMessageById(int message_id, Message message){
         
-        if(messageDAO.getMessageById(message_id) != null && message.getMessage_text() != null && message.getMessage_text().length() <= 255){
+        if(messageDAO.getMessageById(message_id) != null && message.getMessage_text() != "" && message.getMessage_text().length() <= 255){
             
             messageDAO.updateMessageById(message_id, message);
             return messageDAO.getMessageById(message_id);

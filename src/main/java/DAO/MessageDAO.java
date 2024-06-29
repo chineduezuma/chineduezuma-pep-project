@@ -9,6 +9,44 @@ import java.util.List;
 
 public class MessageDAO {
 
+     /**
+     * Retrieve an account using an message object.
+     *
+     * Remember that the format of a select where statement written as a Java String looks something like this:
+     * String sql = "select * from TableName where ColumnName = ?";
+     * The question marks will be filled in by the preparedStatement setString, setInt, etc methods. they follow
+     * this format, where the first argument identifies the question mark to be filled (left to right, starting
+     * from one) and the second argument identifies the value to be used:
+     * preparedStatement.setString(1,string1);
+     * preparedStatement.setString(2,string2);
+     *
+     * @param message an object modelling a Message. the message object does not contain a message ID.
+     */
+    public Account getAccountByPostBy(Message message){
+        Connection connection = ConnectionUtil.getConnection();
+        try {
+            //Write SQL logic here
+            String sql = "SELECT * FROM account WHERE account_id = ?";
+            
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            //write preparedStatement's setString and setInt methods here.
+            preparedStatement.setInt(1, message.getPosted_by());
+
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()){
+                Account account = new Account(rs.getInt("account_id"), rs.getString("username"),
+                        rs.getString("password"));
+                return account;
+            }
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+
+    
+
     /**
      * Adding a new message record into the database which matches the values contained in the message object.
      * Using the getters already written in the account class to retrieve its values (getPosted_by(), getMessage_text(),
@@ -34,13 +72,13 @@ public class MessageDAO {
             try {
                 //SQL logic. When inserting, defined the posted_by, message_text, and time_posted_epoch
                 //values (three columns total!)
-                String sql = "INSERT INTO account(posted_by, message_text, time_posted_epoch) VALUES (?, ?, ?)";
+                String sql = "INSERT INTO message(posted_by, message_text, time_posted_epoch) VALUES (?, ?, ?)";
                 PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
                 //write preparedStatement's setString and setInt methods here.
                 preparedStatement.setInt(1, message.getPosted_by());
                 preparedStatement.setString(2, message.getMessage_text());
-                preparedStatement.setLong(1, message.getTime_posted_epoch());
+                preparedStatement.setLong(3, message.getTime_posted_epoch());
 
 
                 preparedStatement.executeUpdate();
@@ -82,9 +120,9 @@ public class MessageDAO {
 
             ResultSet rs = preparedStatement.executeQuery();
             while(rs.next()){
-                Message message1 = new Message(rs.getInt("message_id"), rs.getInt("posted_by"),
+                Message message = new Message(rs.getInt("message_id"), rs.getInt("posted_by"),
                         rs.getString("message_text"), rs.getLong("time_posted_epoch"));
-                messages.add(message1);
+                messages.add(message);
             }
         }catch(SQLException e){
             System.out.println(e.getMessage());
@@ -146,7 +184,7 @@ public class MessageDAO {
      *
      * @param id a message ID.
      */
-    public Message deleteMessageById(int id){
+    public void deleteMessageById(int id){
         Connection connection = ConnectionUtil.getConnection();
         try {
             //Write SQL logic here
@@ -157,16 +195,12 @@ public class MessageDAO {
             //write preparedStatement's setString and setInt methods here.
             preparedStatement.setInt(1, id);
 
-            ResultSet rs = preparedStatement.executeQuery();
-            while(rs.next()){
-                Message message = new Message(rs.getInt("message_id"), rs.getInt("posted_by"),
-                rs.getString("message_text"), rs.getLong("time_posted_epoch"));
-                return message;
-            }
+            preparedStatement.executeUpdate();
+            
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
-        return null;
+        
     }
 
 
@@ -191,16 +225,14 @@ public class MessageDAO {
         Connection connection = ConnectionUtil.getConnection();
         try {
             //Write SQL logic here
-            String sql = "UPDATE message SET posted_by = ?, message_text = ?, time_posted_epoch = ? WHERE message_id = ?";
+            String sql = "UPDATE message SET message_text = ? WHERE message_id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
             //write PreparedStatement setString and setInt methods here.
-            preparedStatement.setInt(1, message.getPosted_by());
-            preparedStatement.setString(2, message.getMessage_text());
-            preparedStatement.setLong(1, message.getTime_posted_epoch());
-
-
+            preparedStatement.setString(1, message.getMessage_text());
+            preparedStatement.setInt(2, id);
             preparedStatement.executeUpdate();
+
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
@@ -234,9 +266,9 @@ public class MessageDAO {
 
             ResultSet rs = preparedStatement.executeQuery();
             while(rs.next()){
-                Message message1 = new Message(rs.getInt("message_id"), rs.getInt("posted_by"),
+                Message message = new Message(rs.getInt("message_id"), rs.getInt("posted_by"),
                         rs.getString("message_text"), rs.getLong("time_posted_epoch"));
-                messages.add(message1);
+                messages.add(message);
             }
         }catch(SQLException e){
             System.out.println(e.getMessage());
