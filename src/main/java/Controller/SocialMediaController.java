@@ -39,6 +39,14 @@ public class SocialMediaController {
         app.post("/register", this::postNewUserHandler);
         app.post("/login", this::postVerifyUserHandler);
         app.post("/messages", this::postNewMessagesHandler);
+        app.get("/messages", this::getAllMessagesHandler);
+        app.get("/messages/{message_id}", this::getMessageByIdHandler);
+        app.delete("/messages/{message_id}", this::deleteMessageByIdHandler);
+        app.patch("/messages/{message_id}", this::updateMessageByIdHandler);
+        app.get("/accounts/{account_id}/messages", this::getMessagesByUserHandler);
+
+
+
         return app;
     }
 
@@ -114,6 +122,90 @@ public class SocialMediaController {
         }else{
             ctx.status(400);
         }
+    }
+
+
+
+     /**
+     * Handler to retrieve all messages. 
+     * @param ctx the context object handles information HTTP requests and generates responses within Javalin. It will
+     *            be available to this method automatically thanks to the app.put method.
+     */
+    private void getAllMessagesHandler(Context ctx) {
+        List<Message> messages = messageService.getAllMessages();
+        ctx.json(messages);
+    }
+
+
+
+    /**
+     * Handler to retrieve a message by message ID. 
+     * @param ctx the context object handles information HTTP requests and generates responses within Javalin. It will
+     *            be available to this method automatically thanks to the app.put method.
+     */
+    private void getMessageByIdHandler(Context ctx) {
+        int message_id = Integer.parseInt(ctx.pathParam("message_id"));
+        Message message = messageService.getMessageById(message_id);
+        if(message != null){
+            ctx.json(message);
+        } else
+        ctx.status(200);
+    }
+
+
+
+    /**
+     * Handler to delete a message by message ID. 
+     * @param ctx the context object handles information HTTP requests and generates responses within Javalin. It will
+     *            be available to this method automatically thanks to the app.put method.
+     */
+    private void deleteMessageByIdHandler(Context ctx) {
+        int message_id = Integer.parseInt(ctx.pathParam("message_id"));
+        Message message = messageService.deleteMessageById(message_id);
+        
+            ctx.json(message);
+        
+    }
+
+
+
+     /**
+     * Handler to update a message by a message id.
+     * The Jackson ObjectMapper will automatically convert the JSON of the PATCH request into a Message object.
+     * to conform to RESTful standards, the message that is being updated is identified from the path parameter,
+     * but the information required to update a flight is retrieved from the request body.
+     * If MessageService returns a null null (meaning updating a message was unsuccessful), the API will return a 400
+     * status (client error). 
+     *
+     * @param ctx the context object handles information HTTP requests and generates responses within Javalin. It will
+     *            be available to this method automatically thanks to the app.put method.
+     * @throws JsonProcessingException will be thrown if there is an issue converting JSON into an object.
+     */
+    private void updateMessageByIdHandler(Context ctx) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Message message = mapper.readValue(ctx.body(), Message.class);
+        int message_id = Integer.parseInt(ctx.pathParam("message_id"));
+        Message updatedMessage = messageService.updateMessageById(message_id, message);
+        System.out.println(updatedMessage);
+        if(updatedMessage == null){
+            ctx.status(400);
+        }else{
+            ctx.json(mapper.writeValueAsString(updatedMessage));
+        }
+
+    }
+
+
+
+     /**
+     * Handler to retrieve all messages by a particular user. 
+     * @param ctx the context object handles information HTTP requests and generates responses within Javalin. It will
+     *            be available to this method automatically thanks to the app.put method.
+     */
+    private void getMessagesByUserHandler(Context ctx) {
+        int account_id = Integer.parseInt(ctx.pathParam("account_id"));
+        List<Message> messages = messageService.getMessageByPostBy(account_id);
+        ctx.json(messages);
     }
 
 

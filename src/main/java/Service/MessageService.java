@@ -100,13 +100,14 @@ public class MessageService {
      */
     public Message deleteMessageById(int message_id){
         
-        if(messageDAO.getMessageById(message_id) == null){
+        if(messageDAO.getMessageById(message_id) != null){
             
-            return null;
+            return messageDAO.getMessageById(message_id);
         }
 
             messageDAO.deleteMessageById(message_id);
             return messageDAO.getMessageById(message_id);
+            
     }
 
 
@@ -150,5 +151,7 @@ public class MessageService {
             return messageDAO.getMessageByPostBy(account_id);
        
     }
+
+
 
 }

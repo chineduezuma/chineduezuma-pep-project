@@ -148,6 +148,7 @@ public class MessageDAO {
      */
     public Message getMessageById(int id){
         Connection connection = ConnectionUtil.getConnection();
+        
         try {
             //Write SQL logic here
             String sql = "SELECT * FROM message WHERE message_id = ?";
@@ -167,6 +168,7 @@ public class MessageDAO {
             System.out.println(e.getMessage());
         }
         return null;
+        
     }
 
 
