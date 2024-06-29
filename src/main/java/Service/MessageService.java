@@ -104,11 +104,8 @@ public class MessageService {
             Message message = messageDAO.getMessageById(message_id);
             messageDAO.deleteMessageById(message_id);
             return message;
-        }
-
-            
-         return null;
-            
+        } 
+         return null;        
     }
 
 
