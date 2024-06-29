@@ -101,12 +101,13 @@ public class MessageService {
     public Message deleteMessageById(int message_id){
         
         if(messageDAO.getMessageById(message_id) != null){
-            
-            return messageDAO.getMessageById(message_id);
+            Message message = messageDAO.getMessageById(message_id);
+            messageDAO.deleteMessageById(message_id);
+            return message;
         }
 
-            messageDAO.deleteMessageById(message_id);
-            return messageDAO.getMessageById(message_id);
+            
+         return null;
             
     }
 
